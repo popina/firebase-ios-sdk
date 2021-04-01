@@ -389,6 +389,9 @@ static bool FIRCLSContextRecordIdentity(FIRCLSFile* file, const FIRCLSContextIni
   FIRCLSFileWriteHashEntryUint64(file, "started_at", time(NULL));
 
   FIRCLSFileWriteHashEntryString(file, "session_id", initData->sessionId);
+  // install_id is written into the proto directly. This is only left here to
+  // support Apple Report Converter.
+  FIRCLSFileWriteHashEntryString(file, "install_id", "");
   FIRCLSFileWriteHashEntryString(file, "beta_token", initData->betaToken);
   FIRCLSFileWriteHashEntryBoolean(file, "absolute_log_timestamps", true);
 
