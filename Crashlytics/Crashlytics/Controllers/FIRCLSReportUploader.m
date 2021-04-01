@@ -40,6 +40,7 @@
 }
 
 @property(nonatomic, strong) GDTCORTransport *googleTransport;
+@property(nonatomic, strong) FIRCLSInstallIdentifierModel *installIDModel;
 
 @property(nonatomic, readonly) NSString *googleAppID;
 
@@ -56,6 +57,7 @@
   _operationQueue = managerData.operationQueue;
   _googleAppID = managerData.googleAppID;
   _googleTransport = managerData.googleTransport;
+  _installIDModel = managerData.installIDModel;
   _fileManager = managerData.fileManager;
   _analytics = managerData.analytics;
 
@@ -84,6 +86,14 @@
   // symbolication operation may be computationally intensive.
   FIRCLSApplicationActivity(
       FIRCLSApplicationActivityDefault, @"Crashlytics Crash Report Processing", ^{
+        [self.installIDModel regenerateInstallIDIfNeededWithBlock:^(BOOL didRotate) {
+          if (!didRotate) {
+            return;
+          }
+
+          FIRCLSInfoLog(@"Rotated Crashlytics Install UUID because Firebase Install ID changed.");
+        }];
+
         // Run on-device symbolication before packaging if we should process
         if (shouldProcess) {
           if (![self.fileManager moveItemAtPath:report.path
