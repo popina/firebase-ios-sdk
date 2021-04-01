@@ -100,8 +100,7 @@ FIRCLSContextInitData FIRCLSContextBuildInitData(FIRCLSInternalReport* report,
 bool FIRCLSContextInitialize(FIRCLSInternalReport* report,
                              FIRCLSSettings* settings,
                              FIRCLSFileManager* fileManager) {
-  FIRCLSContextInitData initDataObj =
-      FIRCLSContextBuildInitData(report, settings, fileManager);
+  FIRCLSContextInitData initDataObj = FIRCLSContextBuildInitData(report, settings, fileManager);
   FIRCLSContextInitData* initData = &initDataObj;
 
   if (!initData) {
