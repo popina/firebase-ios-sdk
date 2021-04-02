@@ -109,15 +109,16 @@ static unsigned long long FIRCLSInstallationsWaitTime = 10 * NSEC_PER_SEC;
     // This runs Completion async, so wait a reasonable amount of time for it to finish.
     [self.installations
         installationIDWithCompletion:^(NSString *_Nullable currentIID, NSError *_Nullable error) {
-            BOOL didRotate = [self rotateCrashlyticsInstallUUIDWithIID:currentIID error:error];
+          BOOL didRotate = [self rotateCrashlyticsInstallUUIDWithIID:currentIID error:error];
 
-            if (didRotate) {
-                FIRCLSInfoLog(@"Rotated Crashlytics Install UUID because Firebase Install ID changed.");
-            }
-            dispatch_semaphore_signal(semaphore);
-    }];
+          if (didRotate) {
+            FIRCLSInfoLog(@"Rotated Crashlytics Install UUID because Firebase Install ID changed.");
+          }
+          dispatch_semaphore_signal(semaphore);
+        }];
 
-    intptr_t result = dispatch_semaphore_wait(semaphore, dispatch_time(DISPATCH_TIME_NOW, FIRCLSInstallationsWaitTime));
+    intptr_t result = dispatch_semaphore_wait(
+        semaphore, dispatch_time(DISPATCH_TIME_NOW, FIRCLSInstallationsWaitTime));
     if (result != 0) {
       FIRCLSErrorLog(@"Crashlytics timed out while checking for Firebase Installation ID");
     }
