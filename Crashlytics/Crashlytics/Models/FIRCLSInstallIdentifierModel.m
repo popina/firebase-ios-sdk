@@ -35,6 +35,8 @@ static unsigned long long FIRCLSInstallationsWaitTime = 10 * NSEC_PER_SEC;
 
 @property(nonatomic, readonly) FIRInstallations *installations;
 
+@property(nonatomic, assign) dispatch_once_t regenerateOnceToken;
+
 @end
 
 @implementation FIRCLSInstallIdentifierModel
@@ -98,18 +100,19 @@ static unsigned long long FIRCLSInstallationsWaitTime = 10 * NSEC_PER_SEC;
 
 #pragma mark Privacy Shield
 
-- (void)regenerateInstallIDIfNeeded {
+- (BOOL)regenerateInstallIDIfNeeded {
+  BOOL __block didRotate = false;
+
   // Run this only once because it can be run multiple times in succession,
   // and if it's slow it could delay crash upload too much without providing
   // user benefit.
-  static dispatch_once_t onceToken;
-  dispatch_once(&onceToken, ^{
+  dispatch_once(&_regenerateOnceToken, ^{
     dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
 
     // This runs Completion async, so wait a reasonable amount of time for it to finish.
     [self.installations
         installationIDWithCompletion:^(NSString *_Nullable currentIID, NSError *_Nullable error) {
-          BOOL didRotate = [self rotateCrashlyticsInstallUUIDWithIID:currentIID error:error];
+          didRotate = [self rotateCrashlyticsInstallUUIDWithIID:currentIID error:error];
 
           if (didRotate) {
             FIRCLSInfoLog(@"Rotated Crashlytics Install UUID because Firebase Install ID changed.");
@@ -123,6 +126,7 @@ static unsigned long long FIRCLSInstallationsWaitTime = 10 * NSEC_PER_SEC;
       FIRCLSErrorLog(@"Crashlytics timed out while checking for Firebase Installation ID");
     }
   });
+  return didRotate;
 }
 
 - (BOOL)rotateCrashlyticsInstallUUIDWithIID:(NSString *_Nullable)currentIID
