@@ -86,13 +86,10 @@
   // symbolication operation may be computationally intensive.
   FIRCLSApplicationActivity(
       FIRCLSApplicationActivityDefault, @"Crashlytics Crash Report Processing", ^{
-        [self.installIDModel regenerateInstallIDIfNeededWithBlock:^(BOOL didRotate) {
-          if (!didRotate) {
-            return;
-          }
 
-          FIRCLSInfoLog(@"Rotated Crashlytics Install UUID because Firebase Install ID changed.");
-        }];
+        // Check to see if the FID has rotated before we construct the payload
+        // so that the payload has an updated value.
+        [self.installIDModel regenerateInstallIDIfNeeded];
 
         // Run on-device symbolication before packaging if we should process
         if (shouldProcess) {
